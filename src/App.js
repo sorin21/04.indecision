@@ -1,4 +1,5 @@
 import React from 'react';
+import Counter from './playground/counter-example-lifecycle';
 
 class IndecisionApp extends React.Component {
   state = {
@@ -34,6 +35,31 @@ class IndecisionApp extends React.Component {
     this.setState((prevState) => ({options: prevState.options.concat(option)}));
   } 
 
+  componentDidMount() {
+    try {
+      const json = localStorage.getItem('options');
+      const options = JSON.parse(json);
+
+      if(options) {
+        this.setState(() => ({ options }));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+  componentDidUpdate(prevProps, prevState) {
+    if(prevState.options.length !== this.state.options.length){
+      const json = JSON.stringify(this.state.options);
+      localStorage.setItem('options', json);
+    }
+    console.log('Component did Update');
+  }
+
+  componentWillUnmount() {
+    console.log('Component will Unmount');
+  }
+
   render() {
     const title = "Indecision Aplication";
     const subtitle = "Put your life in the hands of a computer!";
@@ -52,6 +78,7 @@ class IndecisionApp extends React.Component {
         <AddOption 
           addOption = {this.addOption}
          />
+        <Counter />
       </div>
     );
   }
@@ -120,7 +147,11 @@ class AddOption extends React.Component {
 
     const option = event.target.elements.option.value.trim();
     const error = this.props.addOption(option);
-    this.setState(() => ({error}))
+    this.setState(() => ({error}));
+
+    if(!error) {
+      event.target.elements.option.value = '';
+    }
   }
 
   render() {
